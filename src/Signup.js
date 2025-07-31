@@ -11,7 +11,7 @@ function Signup() {
   const handleSignup = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      alert('Signup successful! You can now log in.');
+      
     } catch (error) {
       alert('Signup failed: ' + error.message);
     }

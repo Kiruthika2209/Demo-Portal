@@ -1,75 +1,108 @@
-// Dashboard.js
-import React, { useState } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from './firebase';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
-function Dashboard() {
-  const navigate = useNavigate();
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState('');
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    alert('Logged out successfully!');
-    navigate('/login');
+const Dashboard = () => {
+  const [tasks, setTasks] = useState([]);
+  const [inputTask, setInputTask] = useState('');
+  const [editIndex, setEditIndex] = useState(null);
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('tasks');
+    if (stored) {
+      setTasks(JSON.parse(stored));
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  const handleAddOrUpdate = () => {
+    if (inputTask.trim() === '') return;
+
+    if (editIndex !== null) {
+      const updated = [...tasks];
+      updated[editIndex].name = inputTask;
+      setTasks(updated);
+      setEditIndex(null);
+    } else {
+      setTasks([...tasks, { name: inputTask, completed: false }]);
+    }
+
+    setInputTask('');
   };
 
-  const addTodo = () => {
-    if (input.trim() === '') return;
-    setTodos([...todos, { text: input, completed: false }]);
-    setInput('');
+  const handleEdit = (index) => {
+    setInputTask(tasks[index].name);
+    setEditIndex(index);
   };
 
-  const toggleTodo = (index) => {
-    const updated = [...todos];
+  const handleDelete = (index) => {
+    const updated = tasks.filter((_, i) => i !== index);
+    setTasks(updated);
+  };
+
+  const handleToggleStatus = (index) => {
+    const updated = [...tasks];
     updated[index].completed = !updated[index].completed;
-    setTodos(updated);
-  };
-
-  const deleteTodo = (index) => {
-    const updated = todos.filter((_, i) => i !== index);
-    setTodos(updated);
+    setTasks(updated);
   };
 
   return (
-    <div className="dashboard-container">
-      <h2>🎉 Welcome to the Dashboard!</h2>
-      <p>This is your protected area after login.</p>
-      <button className="logout-button" onClick={handleLogout}>Logout</button>
-
-      <hr />
-
-      <h3>📝 Todo List</h3>
-
-      <div className="todo-input-section">
+    <div className="dashboard">
+      <h2>Dashboard - To-Do List</h2>
+      <div className="input-section">
         <input
           type="text"
-          value={input}
+          value={inputTask}
+          onChange={(e) => setInputTask(e.target.value)}
           placeholder="Enter a task"
-          onChange={(e) => setInput(e.target.value)}
-          className="todo-input"
         />
-        <button onClick={addTodo} className="add-button">Add</button>
+        <button onClick={handleAddOrUpdate}>
+          {editIndex !== null ? 'Update' : 'Add'}
+        </button>
       </div>
 
-      <ul className="todo-list">
-        {todos.map((todo, index) => (
-          <li key={index} className="todo-item">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(index)}
-            />
-            <span className={todo.completed ? "todo-text completed" : "todo-text"}>
-              {todo.text}
-            </span>
-            <button className="delete-button" onClick={() => deleteTodo(index)}>❌</button>
-          </li>
-        ))}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Edit</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.length === 0 ? (
+            <tr>
+              <td colSpan="5">No tasks available</td>
+            </tr>
+          ) : (
+            tasks.map((task, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td className={task.completed ? 'completed' : ''}>{task.name}</td>
+                <td>
+                  <button onClick={() => handleToggleStatus(index)}>
+                    {task.completed ? 'Done' : 'Pending'}
+                  </button>
+                </td>
+                <td>
+                  <button onClick={() => handleEdit(index)}>Edit</button>
+                </td>
+                <td>
+                  <button onClick={() => handleDelete(index)}>Remove</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
 
 export default Dashboard;

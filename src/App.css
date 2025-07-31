@@ -74,59 +74,61 @@ a {
 a:hover {
   text-decoration: underline;
 }
-.dashboard-container {
-  max-width: 600px;
-  margin: auto;
+.dashboard {
+  max-width: 800px;
+  margin: 40px auto;
   padding: 20px;
-  text-align: left;
+  border-radius: 10px;
+  background-color: #f7f9fc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.logout-button {
-  background-color: #ff4d4d;
-  border: none;
-  color: white;
-  padding: 8px 16px;
-  cursor: pointer;
+.dashboard h2 {
+  text-align: center;
   margin-bottom: 20px;
-  border-radius: 4px;
 }
 
-.todo-input-section {
-  margin-top: 20px;
+.input-section {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.todo-input {
+.input-section input {
+  flex: 1;
   padding: 8px;
-  width: 70%;
-  margin-right: 10px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.add-button {
+.input-section button {
   padding: 8px 16px;
-  background-color: #4caf50;
+  background-color: #007bfc;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-.todo-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
+.input-section button:hover {
+  background-color: #005bb5;
 }
 
-.todo-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
 }
 
-.todo-text {
-  margin-left: 10px;
-  flex-grow: 1;
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+th {
+  background-color: #e8f0fe;
 }
 
 .completed {
@@ -134,11 +136,36 @@ a:hover {
   color: #888;
 }
 
-.delete-button {
-  margin-left: 10px;
-  background: none;
+button {
+  padding: 5px 10px;
   border: none;
-  color: red;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+}
+
+td button:nth-child(1) {
+  background-color: #28a745;
+  color: white;
+}
+
+td button:nth-child(1):hover {
+  background-color: #218838;
+}
+
+td button:nth-child(2) {
+  background-color: #ffc107;
+  color: black;
+}
+
+td button:nth-child(2):hover {
+  background-color: #e0a800;
+}
+
+td button:nth-child(3) {
+  background-color: #dc3545;
+  color: white;
+}
+
+td button:nth-child(3):hover {
+  background-color: #c82333;
 }
