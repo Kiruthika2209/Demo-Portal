@@ -169,3 +169,18 @@ td button:nth-child(3) {
 td button:nth-child(3):hover {
   background-color: #c82333;
 }
+.logout-button {
+  background-color: #e74c3c; /* Red color */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  margin-left: auto; /* Pushes to right if inside a flex container */
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}

@@ -1,57 +1,86 @@
 import React, { useState, useEffect } from 'react';
-
+import { auth, db } from './firebase'; // adjust path if needed
+import { signOut } from 'firebase/auth';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
+} from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [inputTask, setInputTask] = useState('');
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const navigate = useNavigate();
 
-  // Load from localStorage
+  const user = auth.currentUser;
+
+  // Fetch tasks on mount (real-time sync)
   useEffect(() => {
-    const stored = localStorage.getItem('tasks');
-    if (stored) {
-      setTasks(JSON.parse(stored));
-    }
-  }, []);
+    if (!user) return;
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+    const q = query(collection(db, 'users', user.uid, 'tasks'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedTasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(fetchedTasks);
+    });
 
-  const handleAddOrUpdate = () => {
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleAddOrUpdate = async () => {
     if (inputTask.trim() === '') return;
 
-    if (editIndex !== null) {
-      const updated = [...tasks];
-      updated[editIndex].name = inputTask;
-      setTasks(updated);
-      setEditIndex(null);
+    if (editId) {
+      const taskRef = doc(db, 'users', user.uid, 'tasks', editId);
+      await updateDoc(taskRef, { name: inputTask });
+      setEditId(null);
     } else {
-      setTasks([...tasks, { name: inputTask, completed: false }]);
+      await addDoc(collection(db, 'users', user.uid, 'tasks'), {
+        name: inputTask,
+        completed: false,
+      });
     }
 
     setInputTask('');
   };
 
-  const handleEdit = (index) => {
-    setInputTask(tasks[index].name);
-    setEditIndex(index);
+  const handleEdit = (task) => {
+    setInputTask(task.name);
+    setEditId(task.id);
   };
 
-  const handleDelete = (index) => {
-    const updated = tasks.filter((_, i) => i !== index);
-    setTasks(updated);
+  const handleDelete = async (taskId) => {
+    await deleteDoc(doc(db, 'users', user.uid, 'tasks', taskId));
   };
 
-  const handleToggleStatus = (index) => {
-    const updated = [...tasks];
-    updated[index].completed = !updated[index].completed;
-    setTasks(updated);
+  const handleToggleStatus = async (task) => {
+    const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+    await updateDoc(taskRef, { completed: !task.completed });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out successfully");
+      navigate('/login');
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (
     <div className="dashboard">
+      <button className="logout-button" onClick={handleLogout}>Logout</button>
       <h2>Dashboard - To-Do List</h2>
       <div className="input-section">
         <input
@@ -61,7 +90,7 @@ const Dashboard = () => {
           placeholder="Enter a task"
         />
         <button onClick={handleAddOrUpdate}>
-          {editIndex !== null ? 'Update' : 'Add'}
+          {editId ? 'Update' : 'Add'}
         </button>
       </div>
 
@@ -82,19 +111,21 @@ const Dashboard = () => {
             </tr>
           ) : (
             tasks.map((task, index) => (
-              <tr key={index}>
+              <tr key={task.id}>
                 <td>{index + 1}</td>
-                <td className={task.completed ? 'completed' : ''}>{task.name}</td>
+                <td className={task.completed ? 'completed' : ''}>
+                  {task.name}
+                </td>
                 <td>
-                  <button onClick={() => handleToggleStatus(index)}>
+                  <button onClick={() => handleToggleStatus(task)}>
                     {task.completed ? 'Done' : 'Pending'}
                   </button>
                 </td>
                 <td>
-                  <button onClick={() => handleEdit(index)}>Edit</button>
+                  <button onClick={() => handleEdit(task)}>Edit</button>
                 </td>
                 <td>
-                  <button onClick={() => handleDelete(index)}>Remove</button>
+                  <button onClick={() => handleDelete(task.id)}>Remove</button>
                 </td>
               </tr>
             ))
