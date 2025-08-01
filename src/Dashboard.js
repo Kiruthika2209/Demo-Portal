@@ -80,7 +80,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <button className="logout-button" onClick={handleLogout}>Logout</button>
       <h2>Dashboard - To-Do List</h2>
       <div className="input-section">
         <input
@@ -93,7 +92,7 @@ const Dashboard = () => {
           {editId ? 'Update' : 'Add'}
         </button>
       </div>
-
+  
       <table>
         <thead>
           <tr>
@@ -132,8 +131,14 @@ const Dashboard = () => {
           )}
         </tbody>
       </table>
+  
+      {/* ✅ Move logout button here */}
+      <div className="logout-container">
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
-
-export default Dashboard;
+export default Dashboard;  
